@@ -1,62 +1,52 @@
 package br.pucpr.usuario;
 
 import java.util.ArrayList;
-import java.util.Objects;
+import java.util.List;
 
 public class UsuarioPrinter {
     public record Usuario(Long id, String nome, String email, String cpf) {
     }
 
-    public void print(ArrayList<Usuario> lista, boolean maskCpf, boolean alignRight, String theme) {
-        if (lista != null && !lista.isEmpty()) {
-            var borderChar = "=";
-            if (Objects.equals(theme, "DARK")) {
-                borderChar = "#";
-            } else if (Objects.equals(theme, "LIGHT")) {
-                borderChar = "-";
-            }
+    public enum Tema {
+        PADRAO("="),
+        DARK("#"),
+        LIGHT("-");
 
-            // Borda superior e cabeçalho
+        private final String caractereBorda;
+
+        Tema(String caractereBorda) {
+            this.caractereBorda = caractereBorda;
+        }
+
+        public String caractereBorda() {
+            return caractereBorda;
+        }
+    }
+
+    public void print(List<Usuario> lista, boolean maskCpf, boolean alignRight, Tema tema) {
+        if (lista != null && !lista.isEmpty()) {
+            var borderChar = tema == null
+                    ? Tema.PADRAO.caractereBorda()
+                    : tema.caractereBorda();
+
+
             var sb = new StringBuilder();
             sb.repeat(borderChar, 74).append("\n");
             sb.append(String.format("| %-5s | %-20s | %-22s | %-14s |\n", "ID", "NOME", "EMAIL", "CPF"));
             sb.repeat(borderChar, 74).append("\n");
             for (var u : lista) {
                 if (u != null) {
-                    //Formatação do nome
-                    var n = u.nome();
-                    if (n == null || n.isEmpty()) {
-                        n = "NÃO INFORMADO";
-                    } else if (n.length() > 20) {
-                        n = n.substring(0, 17) + "...";
-                    }
 
-                    // Formatação do email
-                    var e = u.email();
-                    if (e == null || !e.contains("@")) {
-                        e = "INVALIDO";
-                    }
-
-                    // Formatação do CPF
-                    var c = u.cpf();
-                    if (c != null && c.length() == 11) {
-                        if (maskCpf) {
-                            c = "***." + c.substring(3, 6) + "." + c.substring(6, 9) + "-**";
-                        } else {
-                            c = c.substring(0, 3) + "." + c.substring(3, 6) + "." + c.substring(6, 9) + "-" + c.substring(9, 11);
-                        }
-                    } else {
-                        c = "CPF INVALIDO";
-                    }
-
+                    var n = formatarNome(u.nome());
+                    var e = formatarEmail(u.email());
+                    var c = formatarCpf(u.cpf(), maskCpf);
                     var idStr = u.id() != null ? u.id().toString() : "0";
                     sb.append(String.format("| %-5s | %-20s | %-22s | %-14s |\n", idStr, n, e, c));
                 }
+            }
 
-                //Borda inferior
                 sb.repeat(borderChar, 74).append("\n");
 
-                //Espaçamento
                 if (alignRight) {
                     var lines = sb.toString().split("\n");
                     for (var line : lines) {
@@ -65,10 +55,42 @@ public class UsuarioPrinter {
                 } else {
                     System.out.print(sb);
                 }
-            }
         } else {
             System.out.println("ERRO: Lista de usuários vazia ou nula.");
         }
+
+    }
+    private String formatarNome(String nome) {
+        if (nome == null || nome.isEmpty()) {
+            return "NÃO INFORMADO";
+        }
+
+        if (nome.length() > 20) {
+            return nome.substring(0, 17) + "...";
+        }
+
+        return nome;
+    }
+
+    private String formatarEmail(String email) {
+        if (email == null || !email.contains("@")) {
+            return "INVALIDO";
+        }
+
+        return email;
+    }
+
+    private String formatarCpf(String cpf, boolean mascarar) {
+        if (cpf == null || cpf.length() != 11) {
+            return "CPF INVALIDO";
+        }
+
+        if (mascarar) {
+            return "***." + cpf.substring(3, 6) + "." + cpf.substring(6, 9) + "-**";
+        }
+
+        return cpf.substring(0, 3) + "." + cpf.substring(3, 6) + "."
+                + cpf.substring(6, 9) + "-" + cpf.substring(9, 11);
     }
 
     public static void main(String[] args) {
@@ -81,6 +103,6 @@ public class UsuarioPrinter {
         usuarios.add(new Usuario(106L, "", "beatriz@email.com", "55566677788"));
 
         var printer = new UsuarioPrinter();
-        printer.print(usuarios, true, true, "LIGHT");
+        printer.print(usuarios, true, true, Tema.LIGHT);
     }
 }
