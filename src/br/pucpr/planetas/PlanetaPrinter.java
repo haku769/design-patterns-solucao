@@ -1,10 +1,10 @@
-package br.pucpr.usuario;
+package br.pucpr.planetas;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class UsuarioPrinter {
-    public record Usuario(Long id, String nome, String email, String cpf) {
+public class PlanetaPrinter {
+    public record Planeta(Long id, String nome, String email, String cpf) {
     }
 
     public enum Tema {
@@ -23,7 +23,7 @@ public class UsuarioPrinter {
         }
     }
 
-    public void print(List<Usuario> lista, boolean maskCpf, boolean alignRight, Tema tema) {
+    public void print(List<Planeta> lista, boolean maskCpf, boolean alignRight, Tema tema) {
         if (lista != null && !lista.isEmpty()) {
             var borderChar = tema == null
                     ? Tema.PADRAO.caractereBorda()
@@ -56,7 +56,7 @@ public class UsuarioPrinter {
                     System.out.print(sb);
                 }
         } else {
-            System.out.println("ERRO: Lista de usuários vazia ou nula.");
+            System.out.println("ERRO: Lista de planetas vazia ou nula.");
         }
 
     }
@@ -94,15 +94,15 @@ public class UsuarioPrinter {
     }
 
     public static void main(String[] args) {
-        var usuarios = new ArrayList<Usuario>();
-        usuarios.add(new Usuario(101L, "Carlos Eduardo de Souza", "carlos.souza@email.com", "12345678901"));
-        usuarios.add(new Usuario(102L, "Ana Maria Silva", "ana.silva@email.com", "98765432100"));
-        usuarios.add(new Usuario(103L, "João Pedro de Alcântara Bragança", "joao.pedro@email.com", "45678912345"));
-        usuarios.add(new Usuario(104L, "Mariana Costa", "marianacosta.email.com", "11122233344"));
-        usuarios.add(new Usuario(105L, "Lucas Mendes", "lucas@email.com", "12345"));
-        usuarios.add(new Usuario(106L, "", "beatriz@email.com", "55566677788"));
+        var planetas = new ArrayList<Planeta>();
+        planetas.add(new Planeta(101L, "Carlos Eduardo de Souza", "carlos.souza@email.com", "12345678901"));
+        planetas.add(new Planeta(102L, "Ana Maria Silva", "ana.silva@email.com", "98765432100"));
+        planetas.add(new Planeta(103L, "João Pedro de Alcântara Bragança", "joao.pedro@email.com", "45678912345"));
+        planetas.add(new Planeta(104L, "Mariana Costa", "marianacosta.email.com", "11122233344"));
+        planetas.add(new Planeta(105L, "Lucas Mendes", "lucas@email.com", "12345"));
+        planetas.add(new Planeta(106L, "", "beatriz@email.com", "55566677788"));
 
-        var printer = new UsuarioPrinter();
-        printer.print(usuarios, true, true, Tema.LIGHT);
+        var printer = new PlanetaPrinter();
+        printer.print(planetas, true, true, Tema.LIGHT);
     }
 }
