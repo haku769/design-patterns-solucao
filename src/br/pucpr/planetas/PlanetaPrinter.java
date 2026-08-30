@@ -28,69 +28,58 @@ public class PlanetaPrinter {
             var borderChar = tema == null
                     ? Tema.PADRAO.caractereBorda()
                     : tema.caractereBorda();
-
+            List<ColumnData<Planeta>> colunas = List.of(
+                    new IdColumn(),
+                    new NameColumn(),
+                    new EmailColumn(),
+                    new CpfColumn(maskCpf)
+            );
+            int larguraTabela = colunas.stream()
+                    .mapToInt(coluna -> coluna.header().length() + 3)
+                    .sum() + 1;
 
             var sb = new StringBuilder();
-            sb.repeat(borderChar, 74).append("\n");
-            sb.append(String.format("| %-5s | %-20s | %-22s | %-14s |\n", "ID", "NOME", "EMAIL", "CPF"));
-            sb.repeat(borderChar, 74).append("\n");
-            for (var u : lista) {
-                if (u != null) {
-
-                    var n = formatarNome(u.nome());
-                    var e = formatarEmail(u.email());
-                    var c = formatarCpf(u.cpf(), maskCpf);
-                    var idStr = u.id() != null ? u.id().toString() : "0";
-                    sb.append(String.format("| %-5s | %-20s | %-22s | %-14s |\n", idStr, n, e, c));
+            adicionarBorda(sb, borderChar, larguraTabela);
+            adicionarLinha(sb, colunas, null);
+            adicionarBorda(sb, borderChar, larguraTabela);
+            for (var planeta : lista) {
+                if (planeta != null) {
+                    adicionarLinha(sb, colunas, planeta);
                 }
             }
+            adicionarBorda(sb, borderChar, larguraTabela);
 
-                sb.repeat(borderChar, 74).append("\n");
-
-                if (alignRight) {
-                    var lines = sb.toString().split("\n");
-                    for (var line : lines) {
-                        System.out.println("                    " + line);
-                    }
-                } else {
-                    System.out.print(sb);
+            if (alignRight) {
+                var lines = sb.toString().split("\n");
+                for (var line : lines) {
+                    System.out.println("                    " + line);
                 }
+            } else {
+                System.out.print(sb);
+            }
         } else {
             System.out.println("ERRO: Lista de planetas vazia ou nula.");
         }
-
-    }
-    private String formatarNome(String nome) {
-        if (nome == null || nome.isEmpty()) {
-            return "NÃO INFORMADO";
-        }
-
-        if (nome.length() > 20) {
-            return nome.substring(0, 17) + "...";
-        }
-
-        return nome;
     }
 
-    private String formatarEmail(String email) {
-        if (email == null || !email.contains("@")) {
-            return "INVALIDO";
-        }
-
-        return email;
+    private void adicionarBorda(StringBuilder sb, String caractere, int largura) {
+        sb.repeat(caractere, largura).append('\n');
     }
 
-    private String formatarCpf(String cpf, boolean mascarar) {
-        if (cpf == null || cpf.length() != 11) {
-            return "CPF INVALIDO";
+    private void adicionarLinha(StringBuilder sb, List<ColumnData<Planeta>> colunas, Planeta planeta) {
+        sb.append('|');
+        for (var coluna : colunas) {
+            var conteudo = planeta == null ? coluna.header() : ajustar(coluna.get(planeta), coluna.header().length());
+            sb.append(String.format(" %-" + coluna.header().length() + "s |", conteudo));
         }
+        sb.append('\n');
+    }
 
-        if (mascarar) {
-            return "***." + cpf.substring(3, 6) + "." + cpf.substring(6, 9) + "-**";
+    private String ajustar(String valor, int largura) {
+        if (valor.length() <= largura) {
+            return valor;
         }
-
-        return cpf.substring(0, 3) + "." + cpf.substring(3, 6) + "."
-                + cpf.substring(6, 9) + "-" + cpf.substring(9, 11);
+        return largura < 3 ? ".".repeat(largura) : valor.substring(0, largura - 3) + "...";
     }
 
     public static void main(String[] args) {
