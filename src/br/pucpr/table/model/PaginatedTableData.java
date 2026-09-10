@@ -2,10 +2,11 @@ package br.pucpr.table.model;
 
 import java.util.Objects;
 
-public final class PaginatedTableData implements TableData {
+public final class PaginatedTableData implements ObservableTableData {
     private final TableData data;
     private final int page;
     private final int pageSize;
+    private final TableDataChangeSupport changeSupport = new TableDataChangeSupport(this);
 
     public PaginatedTableData(TableData data, int page, int pageSize) {
         this.data = Objects.requireNonNull(data, "TableData não pode ser nulo");
@@ -21,6 +22,10 @@ public final class PaginatedTableData implements TableData {
         }
         this.page = page;
         this.pageSize = pageSize;
+
+        if (data instanceof ObservableTableData observableData) {
+            observableData.addObserver(ignored -> changeSupport.notifyObservers());
+        }
     }
 
     @Override
@@ -52,6 +57,16 @@ public final class PaginatedTableData implements TableData {
 
     public int pageCount() {
         return Math.max(1, (data.rowCount() + pageSize - 1) / pageSize);
+    }
+
+    @Override
+    public void addObserver(TableDataObserver observer) {
+        changeSupport.addObserver(observer);
+    }
+
+    @Override
+    public void removeObserver(TableDataObserver observer) {
+        changeSupport.removeObserver(observer);
     }
 
     private int firstRow() {
